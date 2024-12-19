@@ -31,7 +31,7 @@ class ProductService
                         'id'=>$product->id,
                         'name'=>$product->name,
                         'description'=>$product->description,
-                        'price'=>$product->price,
+                        'price'=>$product->formatted_price,
                         'quantity'=>$product->quantity,
                         'image_url'=>$image_path ? Storage::url($image_path) : null
                     ];
@@ -102,7 +102,7 @@ class ProductService
                 'id' => $product->id,
                 'name' => $product->name,
                 'description' => $product->description,
-                'price' => $product->price,
+                'price' => $product->formatted_price,
                 'quantity' => $product->quantity,
                 'images' => $images,
             ];
@@ -131,10 +131,10 @@ class ProductService
                     'id' => $product->id,
                     'name'=>$product->name,
                     'description' => $product->description,
-                    'price' => $product->price,
+                    'price' => $product->formatted_price,
                     'quantity' => $product->quantity,
                     'images' =>$product->images()
-                    ->latest()
+                    ->orderBy('is_primary','desc')
                     ->get()
                     ->map(function($image){
                         $image_url = Storage::url($image->image_path);
@@ -191,7 +191,7 @@ class ProductService
                     'id' => $product->id,
                     'name' => $product->name,
                     'description' => $product->description,
-                    'price' => $product->price,
+                    'price' => $product->formatted_price,
                     'quantity' => $product->quantity,
                     'image_url' => Storage::url($product->images()->where('is_primary', 1)->pluck('image_path')->first()),
                 ];

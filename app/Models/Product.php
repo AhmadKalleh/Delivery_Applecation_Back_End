@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * 
+ *
  *
  * @property int $id
  * @property string $name
@@ -46,6 +46,10 @@ class Product extends Model
 
     protected $fillable = ['name','description','price','quantity','store_id'];
 
+    public function getFormattedPriceAttribute()
+    {
+        return number_format($this->price, 0, '.', ',');
+    }
 
     public function store():BelongsTo
     {
