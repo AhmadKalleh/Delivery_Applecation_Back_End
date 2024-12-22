@@ -12,7 +12,7 @@ class CartService
     public function index():array
     {
 
-        if(Auth::user()->hasRole('admin') || Auth::user()->hasRole('superAdmin') || Auth::user()->hasRole('client'))
+        if (Auth::user()->hasAnyRole(['admin', 'superAdmin', 'client']))
         {
             $products_in_cart =Auth::user()->carts()
             ->with('product')
@@ -25,7 +25,7 @@ class CartService
                     'quantity' =>$cart->quantity,
                     'name' => $product->name,
                     'description' => $product->description,
-                    'price' => $product->price,
+                    'price' => $product->formatted_price.' SYP'
                 ];
             });
         }
@@ -41,7 +41,7 @@ class CartService
 
         $code = 200;
 
-        return ['data' =>$products_in_cart,'message'=>$message,'code'=>$code];
+        return ['data' =>['products_in_carts' => $products_in_cart ],'message'=>$message,'code'=>$code];
 
     }
 
@@ -51,24 +51,47 @@ class CartService
 
         if(!is_null($product))
         {
-            if(Auth::user()->hasRole('admin') || Auth::user()->hasRole('superAdmin') || Auth::user()->hasRole('client'))
+            if (Auth::user()->hasAnyRole(['admin', 'superAdmin', 'client']))
             {
-                $cart = Auth::user()->carts()->create([
-                    'product_id' => $product->id,
-                    'quantity'=>$request->quantity
-                ]);
+                if($request->quantity <= $product->quantity)
+                {
 
-                DeleteOrderProductsJob::dispatch()->delay(now()->addMinute(10));
+                    if (!Auth::user()->carts()->where('product_id', $product->id)->exists())
+                    {
+                        $cart = Auth::user()->carts()->create([
+                            'product_id' => $product->id,
+                            'quantity'=>$request->quantity
+                        ]);
 
-                $data =[
-                    'id'=>$cart->id,
-                    'quantity' =>$cart->quantity,
-                    'product'=>$cart->product()->first(),
-                ];
+                    }
+                    else
+                    {
+                        $cart = Auth::user()->carts()->where('product_id', $product->id)->first();
+                        $cart->update([
+                            'quantity' => $cart->quantity + $request->quantity,
+                        ]);
 
-                $message = 'Added to cart successfully';
-                $code = 201;
+                    }
 
+                    //DeleteOrderProductsJob::dispatch()->delay(now()->addMinute(10));
+
+                    $data =[
+                        'id'=>$cart->id,
+                        'quantity' =>$cart->quantity,
+                        'product_id'=>$cart->product->id,
+                        'product_name' =>$cart->product->name,
+                        'product_price' =>$cart->product->formatted_price.' SYP'
+                    ];
+
+                    $message = 'Added to cart successfully';
+                    $code = 201;
+                }
+                else
+                {
+                    $data=[];
+                    $message = 'Not enough quantity in stock';
+                    $code = 400;
+                }
 
             }
         }
@@ -88,20 +111,38 @@ class CartService
 
         if(!is_null($cart))
         {
-            if(Auth::user()->hasRole('admin') || Auth::user()->hasRole('superAdmin') || Auth::user()->hasRole('client'))
+            if (Auth::user()->hasAnyRole(['admin', 'superAdmin', 'client']))
             {
-                $cart->update([
-                    'quantity' => $request->quantity
-                ]);
+                if($request->quantity == 0)
+                {
+                    $cart->delete();
+                    $data = [];
+                    $message = 'order_product deleted successfully';
+                    $code = 410;
+                }
+                else if($request->quantity <= $cart->product->quantity)
+                {
+                    $cart->update([
+                        'quantity' => $request->quantity
+                    ]);
 
-                $data =[
-                    'id'=>$cart->id,
-                    'quantity' =>$cart->quantity,
-                    'product'=>$cart->product()->first(),
-                ];
+                    $data =[
+                        'id'=>$cart->id,
+                        'quantity' =>$cart->quantity,
+                        'product_id'=>$cart->product->id,
+                        'product_name' =>$cart->product->name,
+                        'product_price' =>$cart->product->formatted_price.' SYP'
+                    ];
 
-                $message = 'order_product updated successfully';
-                $code = 200;
+                    $message = 'order_product updated successfully';
+                    $code = 200;
+                }
+                else
+                {
+                    $data=[];
+                    $message = 'Quantity exceeds stock';
+                    $code = 400;
+                }
             }
 
         }
@@ -121,7 +162,7 @@ class CartService
 
         if(!is_null($cart))
         {
-            if(Auth::user()->hasRole('admin') || Auth::user()->hasRole('superAdmin') || Auth::user()->hasRole('client'))
+            if (Auth::user()->hasAnyRole(['admin', 'superAdmin', 'client']))
             {
                 Auth::user()->carts()
                 ->where('id',$request->cart_id)->delete();

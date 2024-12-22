@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CheckUpdateImageProfileRequest;
 use App\Http\Requests\CheckUpdatePasswordRequest;
 use App\Http\Requests\CheckUpdatePhoneNumberRequest;
 use Auth;
@@ -52,6 +53,21 @@ class UserController extends Controller
         try
         {
             $data = $this->_userService->update_user_phone_number($request->validated());
+            return $this->Success($data['data'],$data['message'],$data['code']);
+        }
+        catch(Throwable $e)
+        {
+            $message = $e->getMessage();
+            return $this->Error($data,$message);
+        }
+    }
+
+    public function update_image_profile(CheckUpdateImageProfileRequest $request):JsonResponse
+    {
+        $data=[];
+        try
+        {
+            $data = $this->_userService->update_user_image_profile($request);
             return $this->Success($data['data'],$data['message'],$data['code']);
         }
         catch(Throwable $e)

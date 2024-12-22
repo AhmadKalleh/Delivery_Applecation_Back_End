@@ -10,7 +10,7 @@ class FavoriteService
 {
     public function index():array
     {
-        if(Auth::user()->hasRole('admin') || Auth::user()->hasRole('superAdmin') || Auth::user()->hasRole('client'))
+        if (Auth::user()->hasAnyRole(['admin', 'superAdmin', 'client']))
         {
             $favorites = Auth::user()->favorites()
             ->latest()
@@ -38,7 +38,7 @@ class FavoriteService
 
         $code = 200;
 
-        return ['data' =>$favorites,'message'=>$message,'code'=>$code];
+        return ['data' =>['favorites' =>  $favorites ],'message'=>$message,'code'=>$code];
 
     }
 
@@ -48,7 +48,7 @@ class FavoriteService
 
         if(!is_null($product))
         {
-            if(Auth::user()->hasRole('admin') || Auth::user()->hasRole('superAdmin') || Auth::user()->hasRole('client'))
+            if (Auth::user()->hasAnyRole(['admin', 'superAdmin', 'client']))
             {
                 $favorite = Auth::user()->favorites()->create([
                     'product_id' => $request->product_id
@@ -58,7 +58,9 @@ class FavoriteService
 
                 $data =[
                     'id'=>$favorite->id,
-                    'product'=>$favorite->product()->first(),
+                    'name' => $product->name,
+                    'description' => $product->description,
+                    'price' => $product->price,
                 ];
 
                 $message = 'Added To favorite successfully';
@@ -82,7 +84,7 @@ class FavoriteService
 
         if(!is_null($favorite))
         {
-            if(Auth::user()->hasRole('admin') || Auth::user()->hasRole('superAdmin') || Auth::user()->hasRole('client'))
+            if (Auth::user()->hasAnyRole(['admin', 'superAdmin', 'client']))
             {
                 Auth::user()->favorites()->where('id',$request->favorite_id)->delete();
                 $data=[];

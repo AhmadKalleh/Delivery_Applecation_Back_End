@@ -40,6 +40,12 @@ class Order extends Model
 
     protected $fillable = ['user_id', 'address_id', 'status', 'payment_method', 'total_price','delivery_date'];
 
+    public function getFormattedPriceAttribute()
+    {
+        return number_format($this->total_price, 0, '.', ','). ' SYP';
+    }
+
+
     public function user():BelongsTo
     {
         return $this->belongsTo(User::class);

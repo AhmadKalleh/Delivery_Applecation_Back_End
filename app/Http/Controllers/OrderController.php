@@ -1,6 +1,10 @@
 <?php
 
 namespace App\Http\Controllers;
+
+use App\Http\Requests\CheckIfExistsOrderId;
+use App\Http\Requests\CheckOrderStoreRequest;
+use App\Http\Requests\CheckOrderUpdateRequest;
 use Illuminate\Http\JsonResponse;
 use Throwable;
 
@@ -35,32 +39,77 @@ class OrderController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(CheckOrderStoreRequest $request):JsonResponse
     {
-        //
+        $data=[];
+
+        try
+        {
+            $data = $this->_orderService->store($request);
+            return $this->Success($data['data'],$data['message'],$data['code']);
+        }
+        catch(Throwable $e)
+        {
+            $message = $e->getMessage();
+            return $this->Error($data,$message);
+        }
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(CheckIfExistsOrderId $request):JsonResponse
     {
-        //
+        $data=[];
+
+        try
+        {
+            $data = $this->_orderService->show($request);
+            return $this->Success($data['data'],$data['message'],$data['code']);
+        }
+        catch(Throwable $e)
+        {
+            $message = $e->getMessage();
+            return $this->Error($data,$message);
+        }
     }
+
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(CheckOrderUpdateRequest $request):JsonResponse
     {
-        //
+        $data=[];
+
+        try
+        {
+            $data = $this->_orderService->update($request);
+            return $this->Success($data['data'],$data['message'],$data['code']);
+        }
+        catch(Throwable $e)
+        {
+            $message = $e->getMessage();
+            return $this->Error($data,$message);
+        }
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(CheckIfExistsOrderId $request)
     {
-        //
+        $data=[];
+
+        try
+        {
+            $data = $this->_orderService->destroy($request);
+            return $this->Success($data['data'],$data['message'],$data['code']);
+        }
+        catch(Throwable $e)
+        {
+            $message = $e->getMessage();
+            return $this->Error($data,$message);
+        }
     }
 }

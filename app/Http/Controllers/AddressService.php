@@ -9,7 +9,7 @@ class AddressService
 
     public function index():array
     {
-        if(Auth::user()->hasRole('admin') || Auth::user()->hasRole('superAdmin') || Auth::user()->hasRole('client'))
+        if (Auth::user()->hasAnyRole(['admin', 'superAdmin', 'client']))
         {
             $addresses = Auth::user()->addresses()
             ->latest()
@@ -36,12 +36,12 @@ class AddressService
         }
 
         $code = 200;
-        return ['data' =>$addresses,'message'=>$message,'code'=>$code];
+        return ['data' =>['addresses' => $addresses ],'message'=>$message,'code'=>$code];
     }
 
     public function store($request):array
     {
-        if(Auth::user()->hasRole('admin') || Auth::user()->hasRole('superAdmin') || Auth::user()->hasRole('client'))
+        if (Auth::user()->hasAnyRole(['admin', 'superAdmin', 'client']))
         {
             $address = Auth::user()->addresses()->create([
                 'name' =>$request->name,
@@ -70,12 +70,16 @@ class AddressService
     {
         $address = Auth::user()->addresses()->where('id',$request->address_id)->first();
 
+
         if(!is_null($address))
         {
-            Auth::user()->addresses()->where('id',$request->address_id)->delete();
-            $data = [];
-            $message = 'address deleted successfully';
-            $code = 200;
+            if (Auth::user()->hasAnyRole(['admin', 'superAdmin', 'client']))
+            {
+                Auth::user()->addresses()->where('id',$request->address_id)->delete();
+                $data = [];
+                $message = 'address deleted successfully';
+                $code = 200;
+            }
         }
         else
         {

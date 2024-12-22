@@ -14,6 +14,7 @@ use Spatie\Permission\Models\Role;
 
 class UserService
 {
+    use UplodeImageHelper;
     function generateUniqueVerificationCode()
     {
         do {
@@ -296,6 +297,27 @@ class UserService
 
         return ['data' =>$data,'message'=>$message,'code'=>$code];
 
+    }
+
+    public function update_user_image_profile($request):array
+    {
+        Auth::user()->update([
+            'image_path' => $this->uplodeImage($request->file('image'),'users')
+        ]);
+
+        $data = [
+            'id' => Auth::user()->id,
+            'image_url' =>Storage::url(Auth::user()->image_path),
+            'first_name' => Auth::user()->first_name,
+            'last_name'=>Auth::user()->last_name,
+            'email' => Auth::user()->email,
+            'phone_number' => Auth::user()->phone_number,
+        ];
+
+        $message = 'Profile updated successfully';
+        $code = 200;
+
+        return ['data' =>$data,'message'=>$message,'code'=>$code];
 
     }
 

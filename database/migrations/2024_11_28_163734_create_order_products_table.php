@@ -19,7 +19,7 @@ return new class extends Migration
             $table->foreignIdFor(Product::class)->constrained()->cascadeOnDelete();
             $table->integer('quantity');
             $table->integer('price');
-            $table->decimal('total_price');
+            $table->decimal('total_price', 30);
             $table->timestamps();
         });
     }

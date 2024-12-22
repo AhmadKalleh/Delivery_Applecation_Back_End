@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(Address::class)->constrained()->cascadeOnDelete();
-            $table->integer('total_price');
+            $table->decimal('total_price', 30);
             $table->string('status')->default('Pending');
             $table->string('payment_method');
             $table->dateTime('delivery_date');

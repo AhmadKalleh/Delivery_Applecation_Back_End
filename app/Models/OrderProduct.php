@@ -30,8 +30,12 @@ class OrderProduct extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['order_id', 'product_id', 'quantity'];
+    protected $fillable = ['order_id', 'product_id', 'quantity','price','total_price'];
 
+    public function getFormattedPriceAttribute()
+    {
+        return number_format($this->total_price, 0, '.', ','). ' SYP';
+    }
     public function order():BelongsTo
     {
         return $this->belongsTo(Order::class);

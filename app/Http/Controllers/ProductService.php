@@ -23,7 +23,6 @@ class ProductService
             if(Auth::user()->hasRole('admin') || Auth::user()->hasRole('superAdmin') || Auth::user()->hasRole('client'))
             {
                 $products = $store->products()
-                ->latest()
                 ->get()
                 ->map(function ($product) {
                     $image_path = $product->images->first()->image_path ?? null;
@@ -47,7 +46,7 @@ class ProductService
                 }
 
                 $code = 200;
-                return ['data' =>$products,'message'=>$message,'code'=>$code];
+                return ['data' =>['products' => $products],'message'=>$message,'code'=>$code];
             }
         }
         else

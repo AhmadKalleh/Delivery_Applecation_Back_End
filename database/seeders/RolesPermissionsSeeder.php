@@ -30,6 +30,7 @@ class RolesPermissionsSeeder extends Seeder
             'create-product','update-product','delete-product','index-product','show-product',
             'create-store','update-store','delete-store','index-store','show-store',
             'create-user','update-user','delete-user','index-user','show-user',
+            'index-notification','show-notification'
         ];
 
         foreach($permissions as $permission)
@@ -55,7 +56,8 @@ class RolesPermissionsSeeder extends Seeder
                 'create-cart','update-cart','delete-cart','index-cart','show-cart',
                 'create-favorite','update-favorite','delete-favorite','index-favorite','show-favorite',
                 'create-order','update-order','delete-order','index-order','show-order','show-user',
-                'update-user','delete-user','index-store','show-store','index-product','show-product'
+                'update-user','delete-user','index-store','show-store','index-product','show-product',
+                'index-notification','show-notification'
             ]);
 
 

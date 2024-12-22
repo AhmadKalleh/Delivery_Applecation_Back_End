@@ -4,16 +4,14 @@ use App\Http\Controllers\AddressController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\FavoriteController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\StoreController;
-use App\Http\Controllers\te;
 use App\Http\Controllers\UserController;
-use App\Http\Requests\CR;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-
+use Illuminate\Http\Request;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -91,7 +89,9 @@ Route::controller(UserController::class)->group(function ()
 
         Route::post('/update_password','update_user_password')->middleware('can:update-user');
 
-        Route::post('/delete_user','destroy')->middleware('can:delete-user');
+        Route::post('/update_image_profile','update_image_profile')->middleware('can:update-user');
+
+        Route::delete('/delete_user','destroy')->middleware('can:delete-user');
     });
 
 });
@@ -156,6 +156,7 @@ Route::controller(FavoriteController::class)->group(function ()
 });
 
 
+// Order Controller
 Route::controller(OrderController::class)->group(function ()
 {
     Route::middleware('auth:sanctum')->group(function ()
@@ -174,17 +175,26 @@ Route::controller(OrderController::class)->group(function ()
 });
 
 
-//6|01Gf9h1tLAOcrzjMLua55NAKWxgsvYAwExibJgC768c8b96f
-//5|7pusCXzfESj5kMihMdM31qxgSAAvbgN5JYq29akc7734f80f
+// Notification Controller
+
+Route::controller(NotificationController::class)->group(function ()
+{
+    Route::middleware('auth:sanctum')->group(function ()
+    {
+        Route::get('/notifications','index')->middleware('can:index-notification');
+    });
+
+});
+
 
 
 // dd($request->headers->all());
-// Route::get('/test',function (Request $request)
-// {
-//     dd($request->headers->all());
-//     $token = $request->header('Authorization');
-//     return response()->json(['token_received' => $token]);
-// });
+Route::get('/test',function (Request $request)
+{
+    //dd($request->headers->all());
+    $token = $request->header('Authorization');
+    return response()->json(['token_received' => $token]);
+});
 
 // Route::get('/test2',function (Request $request)
 // {

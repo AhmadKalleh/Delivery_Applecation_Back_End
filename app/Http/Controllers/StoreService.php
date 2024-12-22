@@ -19,8 +19,12 @@ class StoreService
             ->orderBy('created_at','desc')
             ->get()
             ->map(function ($store) {
-            $store->image_url = $store->image_path ? Storage::url($store->image_path) : null;
-            return $store;
+            return [
+                'id' =>$store->id,
+                'name' =>$store->name,
+                'description' =>$store->description,
+                'image_url' =>$store->image_path ? Storage::url($store->image_path) : null
+            ];
             });
         }
 
@@ -35,7 +39,7 @@ class StoreService
 
 
         $code = 200;
-        return ['data' =>$stores,'message'=>$message,'code'=>$code];
+        return ['data' =>['stores' => $stores ],'message'=>$message,'code'=>$code];
 
     }
 
@@ -71,15 +75,15 @@ class StoreService
 
         if(!is_null($store))
         {
-            if((Auth::user()->hasRole('admin') && $store->user_id== Auth::id())|| Auth::user()->hasRole('superAdmin'))
+            if(Auth::user()->hasRole('admin') && ($store->user_id== Auth::id())|| Auth::user()->hasRole('superAdmin'))
             {
                 $image_path = $store->image_path;
                 $store->update([
                     'name' => $request['name'],
-                    'image_path' => $this->uplodeImage($request,'stores'),
+                    'image_path' => $this->uplodeImage($request['image_path'],'stores'),
                     'description' => $request['description'],
                 ]);
-
+                
                 if(Storage::exists($image_path))
                 {
                     Storage::delete($image_path);
@@ -123,7 +127,7 @@ class StoreService
 
         if(!is_null($store))
         {
-            if((Auth::user()->hasRole('admin') && $store->user_id== Auth::id())|| Auth::user()->hasRole('superAdmin'))
+            if(Auth::user()->hasRole('admin') && ($store->user_id== Auth::id())|| Auth::user()->hasRole('superAdmin'))
             {
                 $image_path = $store->image_path;
 
