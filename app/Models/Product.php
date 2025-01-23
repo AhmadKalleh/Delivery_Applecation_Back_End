@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\Translatable\HasTranslations;
 
 /**
  *
@@ -43,9 +44,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Product extends Model
 {
     use HasFactory;
+    use HasTranslations;
 
     protected $fillable = ['name','description','price','quantity','store_id'];
-
+    public $translatable = ['name', 'description'];
     public function getFormattedPriceAttribute()
     {
         return number_format($this->price, 0, '.', ','). ' SYP';

@@ -69,7 +69,7 @@ class RolesPermissionsSeeder extends Seeder
             'last_name' =>'Kalleh',
             'email' => 'ahmadhkalleh@gmail.com',
             'password' => Hash::make('a72xd2004'),
-            'phone_number' => '0000000000'
+            'phone_number' => '0995884773'
         ]);
 
         $superAdmin2 = User::factory()->create([

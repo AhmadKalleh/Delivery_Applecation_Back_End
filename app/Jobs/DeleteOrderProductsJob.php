@@ -27,7 +27,7 @@ class DeleteOrderProductsJob implements ShouldQueue
      */
     public function handle(): void
     {
-        $expiredTime = Carbon::now()->subMinute(10);
+        $expiredTime = Carbon::now()->subMinute(1);
         Cart::where('created_at','<=',$expiredTime)->delete();
     }
 }

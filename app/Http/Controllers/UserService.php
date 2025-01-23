@@ -301,6 +301,12 @@ class UserService
 
     public function update_user_image_profile($request):array
     {
+
+        if (Storage::exists(Auth::user()->image_path) && Auth::user()->image_path != 'users/profile-user.png') {
+            Storage::delete(Auth::user()->image_path);
+        }
+
+
         Auth::user()->update([
             'image_path' => $this->uplodeImage($request->file('image'),'users')
         ]);

@@ -11,7 +11,7 @@ use App\Notifications\UpdateOrder;
 use Auth;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Notification;
-
+use Illuminate\Support\Facades\Storage;
 
 class OrderService
 {
@@ -62,15 +62,31 @@ class OrderService
     {
         if (Auth::user()->hasAnyRole(['admin', 'superAdmin', 'client']))
         {
+            $cartItems = Cart::query()->where('user_id', Auth::user()->id)->get();
+
+            if($cartItems->isEmpty())
+            {
+                $data =[];
+                $message = 'Cart is empty';
+                $code = 410;
+
+                return ['data' => $data,'message' => $message,'code' => $code];
+            }
+            $total_price = 0;
+            foreach($cartItems as $cartItem)
+            {
+                $total_price += $cartItem->quantity * $cartItem->product->price;
+            }
+
             $order = Order::query()->create([
                 'user_id' => Auth::id(),
                 'address_id' =>$request['address_id'],
-                'total_price' => $request['total_price'],
+                'total_price' => $total_price,
                 'payment_method' => $request['payment_method'],
-                'delivery_date' => Carbon::now()->addMinutes(10),
+                'delivery_date' => Carbon::now()->addMinutes(1),
             ]);
 
-            $cartItems = Cart::query()->where('user_id', Auth::user()->id)->get();
+
 
             foreach ($cartItems as $cartItem)
             {
@@ -86,7 +102,7 @@ class OrderService
 
             Auth::user()->carts()->delete();
 
-            UpdateOrderStatusJob::dispatch($order)->delay(now()->addMinutes(10));
+            UpdateOrderStatusJob::dispatch($order)->delay(now()->addMinutes(1));
             Notification::send($order->user,new CreateOrder($order));
 
             $data =[
@@ -122,6 +138,7 @@ class OrderService
                             'product_id' =>$orderProduct->product->id,
                             'product_name' => $orderProduct->product->name,
                             'product_description' => $orderProduct->product->description,
+                            'image_url'=> Storage::url($orderProduct->product->images()->where('is_primary', 1)->pluck('image_path')->first()) ,
                         ];
                     });
 

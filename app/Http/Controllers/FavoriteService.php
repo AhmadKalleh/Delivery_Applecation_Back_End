@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Jobs\DeleteFavoriteHistoryJob;
+use App\Models\Favorite;
 use App\Models\Product;
 use Auth;
+use Illuminate\Support\Facades\Storage;
 
 class FavoriteService
 {
@@ -20,9 +22,12 @@ class FavoriteService
                 $product = $favorite->product;
                 return [
                     'id' =>$favorite->id,
+                    'product_id' =>$product->id,
                     'name' => $product->name,
                     'description' => $product->description,
-                    'price' => $product->price,
+                    'price' => $product->formatted_price,
+                    'store_name' => $product->store->name,
+                    'image_url' => Storage::url($product->images->first()->image_path),
                 ];
             });
         }
@@ -41,7 +46,6 @@ class FavoriteService
         return ['data' =>['favorites' =>  $favorites ],'message'=>$message,'code'=>$code];
 
     }
-
     public function store($request):array
     {
         $product = Product::where('id',$request->product_id)->first();
@@ -50,21 +54,33 @@ class FavoriteService
         {
             if (Auth::user()->hasAnyRole(['admin', 'superAdmin', 'client']))
             {
-                $favorite = Auth::user()->favorites()->create([
-                    'product_id' => $request->product_id
-                ]);
 
-                DeleteFavoriteHistoryJob::dispatch()->delay(now()->addMinute(10));
+                if(Favorite::query()->where('product_id',$product->id)->first())
+                {
+                    $data = [];
+                    $message = 'this product is already in the favorites';
+                    $code = 410;
+                    return ['data' =>$data,'message'=>$message,'code'=>$code];
+                }
+                else
+                {
+                    $favorite = Auth::user()->favorites()->create([
+                        'product_id' => $request->product_id
+                    ]);
 
-                $data =[
-                    'id'=>$favorite->id,
-                    'name' => $product->name,
-                    'description' => $product->description,
-                    'price' => $product->price,
-                ];
+                    DeleteFavoriteHistoryJob::dispatch()->delay(now()->addMinute(10));
 
-                $message = 'Added To favorite successfully';
-                $code = 200;
+                    $data =[
+                        'id'=>$favorite->id,
+                        'name' => $product->name,
+                        'description' => $product->description,
+                        'price' => $product->price,
+                    ];
+
+                    $message = 'Added To favorite successfully';
+                    $code = 200;
+                }
+
             }
         }
         else

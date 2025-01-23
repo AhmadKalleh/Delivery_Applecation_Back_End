@@ -16,17 +16,29 @@ class StoreService
         if(Auth::user()->hasRole('admin') || Auth::user()->hasRole('superAdmin') || Auth::user()->hasRole('client'))
         {
             $stores = Store::query()
-            ->orderBy('created_at','desc')
-            ->get()
-            ->map(function ($store) {
-            return [
-                'id' =>$store->id,
-                'name' =>$store->name,
-                'description' =>$store->description,
-                'image_url' =>$store->image_path ? Storage::url($store->image_path) : null
-            ];
-            });
+                ->orderBy('created_at','desc')
+                ->get()
+                ->map(function ($store) {
+                return [
+                    'id' =>$store->id,
+                    'name' =>$store->name,
+                    'description' =>$store->description,
+                    'image_url' =>$store->image_path ? Storage::url($store->image_path) : null,
+                    'products'=>$store->products->map(function($product){
+                        return [
+                            'id'=>$product->id,
+                            'name'=>$product->name,
+                            'description'=>$product->description,
+                            'price'=>$product->formatted_price,
+                            'quantity'=>$product->quantity,
+                            'image_url'=> $product->images->first()->image_path ? Storage::url($product->images->first()->image_path) : null,
+                        ];
+                    })
+                ];
+        });
+
         }
+
 
         if($stores->isEmpty())
         {
@@ -42,6 +54,7 @@ class StoreService
         return ['data' =>['stores' => $stores ],'message'=>$message,'code'=>$code];
 
     }
+
 
     public function store($request):array
     {
@@ -83,7 +96,7 @@ class StoreService
                     'image_path' => $this->uplodeImage($request['image_path'],'stores'),
                     'description' => $request['description'],
                 ]);
-                
+
                 if(Storage::exists($image_path))
                 {
                     Storage::delete($image_path);

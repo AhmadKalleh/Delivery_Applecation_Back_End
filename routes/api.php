@@ -60,7 +60,9 @@ Route::controller(ProductController::class)->group(function ()
 {
     Route::middleware('auth:sanctum')->group(function ()
     {
-        Route::get('/products','index')->middleware('can:index-product');
+        Route::get('/products/{storeId}','index')->middleware('can:index-product');
+
+        Route::get('/search','search');
 
         Route::post('/products','store')->middleware('can:create-product');
 

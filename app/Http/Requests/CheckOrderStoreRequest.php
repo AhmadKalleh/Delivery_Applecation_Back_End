@@ -26,7 +26,6 @@ class CheckOrderStoreRequest extends FormRequest
     {
         return [
             'address_id' => 'required|exists:addresses,id',
-            'total_price' =>'required|string',
             'payment_method' => 'required|string',
         ];
     }

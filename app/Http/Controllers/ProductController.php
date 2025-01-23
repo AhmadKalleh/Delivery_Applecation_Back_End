@@ -19,12 +19,27 @@ class ProductController extends Controller
     {
         $this->_productService = $productService;
     }
-    public function index(Request $request):JsonResponse
+    public function index($request):JsonResponse
     {
         $data=[];
         try
         {
             $data = $this->_productService->index($request);
+            return $this->Success($data['data'],$data['message'],$data['code']);
+        }
+        catch(Throwable $e)
+        {
+            $message = $e->getMessage();
+            return $this->Error($data,$message);
+        }
+    }
+
+    public function search(Request $request):JsonResponse
+    {
+        $data=[];
+        try
+        {
+            $data = $this->_productService->Serach($request);
             return $this->Success($data['data'],$data['message'],$data['code']);
         }
         catch(Throwable $e)

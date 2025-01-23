@@ -43,7 +43,7 @@ class ProductSeeder extends Seeder
                 'quantity' => 1000,
                 'store_id' =>1,
                 'images' => [
-                    'products/iphone-15-pro-image-primery.avif',
+                    'products/iphone-15-pro-image-primery.webp',
                     'products/iphone-15-pro-image.jpg',
                     'products/iphone-15-pro-image.webp',
                 ],

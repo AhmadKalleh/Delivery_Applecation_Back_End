@@ -6,6 +6,7 @@ use App\Jobs\DeleteOrderProductsJob;
 use App\Models\Cart;
 use App\Models\Product;
 use Auth;
+use Illuminate\Support\Facades\Storage;
 
 class CartService
 {
@@ -20,14 +21,20 @@ class CartService
             ->get()
             ->map(function($cart) {
                 $product = $cart->product;
-                return [
-                    'id'=>$cart->id,
-                    'quantity' =>$cart->quantity,
-                    'name' => $product->name,
-                    'description' => $product->description,
-                    'price' => $product->formatted_price.' SYP'
-                ];
-            });
+                if($product->quantity > 0)
+                {
+                    return [
+                        'id'=>$cart->id,
+                        'quantity' =>$cart->quantity,
+                        'max_quantity' =>$product->quantity,
+                        'store_name' =>$product->store->name,
+                        'name' => $product->name,
+                        'description' => $product->description,
+                        'price' => $product->formatted_price,
+                        'image_url' => Storage::url($product->images->first()->image_path),
+                    ];
+                }
+            })->filter()->values();
         }
 
         if($products_in_cart->isEmpty())
@@ -44,6 +51,7 @@ class CartService
         return ['data' =>['products_in_carts' => $products_in_cart ],'message'=>$message,'code'=>$code];
 
     }
+
 
     public function store($request):array
     {
@@ -73,7 +81,7 @@ class CartService
 
                     }
 
-                    //DeleteOrderProductsJob::dispatch()->delay(now()->addMinute(10));
+                    DeleteOrderProductsJob::dispatch()->delay(now()->addMinute(10));
 
                     $data =[
                         'id'=>$cart->id,

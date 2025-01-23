@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\Store;
 use Auth;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Storage;
 
 class ProductService
@@ -14,15 +15,61 @@ class ProductService
     use ResponseHelper;
     use UplodeImageHelper;
 
-    public function index(Request $request)
+
+
+public function index($request)
+{
+    // تحديد اللغة بناءً على رأس الطلب
+    //$language = $request->header('Accept-Language', 'en');
+    App::setLocale('ar');
+
+    $store = Store::query()->where('id', '=', $request)->first();
+
+    if (!is_null($store)) {
+        if (Auth::user()->hasRole('admin') || Auth::user()->hasRole('superAdmin') || Auth::user()->hasRole('client')) {
+            $products = $store->products()
+                ->get()
+                ->map(function ($product) {
+                    $image_path = $product->images->first()->image_path ?? null;
+                    $name = $product->getTranslation('name', App::getLocale());
+                    $description = $product->getTranslation('description', App::getLocale());
+                    return [
+                        'id' => $product->id,
+                        'name' => $name,
+                        'description' => $description,
+                        'price' => $product->formatted_price,
+                        'quantity' => $product->quantity,
+                        'image_url' => $image_path ? Storage::url($image_path) : null
+                    ];
+                });
+        }
+
+        if ($products->isEmpty()) {
+            $message = 'no_products_available';
+        } else {
+            $message = 'messages.products_retrieved_successfully';
+        }
+
+        $code = 200;
+        return ['data' => ['products' => $products], 'message' => $message, 'code' => $code];
+    } else {
+        $message = 'messages.store_not_found';
+        $code = 404;
+        return ['data' => $store, 'message' => $message, 'code' => $code];
+    }
+}
+
+
+    public function Serach($request)
     {
-        $store = Store::query()->where('id', '=', $request->id)->first();
+        $store = Store::query()->where('id', '=', $request->store_id)->first();
 
         if(!is_null($store))
         {
-            if(Auth::user()->hasRole('admin') || Auth::user()->hasRole('superAdmin') || Auth::user()->hasRole('client'))
+            if(Auth::user()->hasRole('admin') ||  Auth::user()->hasRole('superAdmin') || Auth::user()->hasRole('client'))
             {
                 $products = $store->products()
+                ->where('products.name', 'LIKE','%'.$request->value.'%' )
                 ->get()
                 ->map(function ($product) {
                     $image_path = $product->images->first()->image_path ?? null;
@@ -35,6 +82,7 @@ class ProductService
                         'image_url'=>$image_path ? Storage::url($image_path) : null
                     ];
                 });
+            }
 
                 if($products->isEmpty())
                 {
@@ -47,7 +95,6 @@ class ProductService
 
                 $code = 200;
                 return ['data' =>['products' => $products],'message'=>$message,'code'=>$code];
-            }
         }
         else
         {
@@ -55,7 +102,6 @@ class ProductService
             $code = 404;
             return ['data' =>$store,'message'=>$message,'code'=>$code];
         }
-
     }
 
     public function store($request):array

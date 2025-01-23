@@ -13,9 +13,10 @@ class StoreSeeder extends Seeder
      */
     public function run(): void
     {
+        //public/storage/stores/photo_2025-01-15_09-00-39.jpg
         $apple_store = Store::query()->create([
             'name' =>'Apple Store',
-            'image_path' => 'stores/apple-store.webp',
+            'image_path' => 'stores/photo_2025-01-15_09-00-39.jpg',
             'description' => 'A premium electronics store offering cutting-edge technology products, including iPhones, MacBooks, and accessories',
             'user_id' =>1
         ]);
